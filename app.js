@@ -497,7 +497,6 @@ function initEventListeners() {
 function renderApp() {
   updatePeriodLabel();
   renderFilterChips();
-  renderTodayBanner();
   renderView();
 }
 
@@ -574,31 +573,6 @@ function renderFilterChips() {
     });
     container.appendChild(chip);
   });
-}
-
-function renderTodayBanner() {
-  const banner = document.getElementById('todayBanner');
-  if (!banner) return;
-
-  // Format YYYY-MM-DD dla "dzisiaj" lub 14 października 2026
-  const sampleDateStr = formatDateKey(currentDate);
-  const todaysEvents = events
-    .filter(e => e.date === sampleDateStr)
-    .sort((a, b) => a.startTime.localeCompare(b.startTime));
-
-  if (todaysEvents.length > 0) {
-    const listStr = todaysEvents.map(e => `<strong>${e.startTime}-${e.endTime}</strong> ${e.subject} (${e.location || 'Brak sali'})`).join(' • ');
-    banner.style.display = 'flex';
-    banner.innerHTML = `
-      <div class="today-banner-content">
-        <span class="today-banner-badge">Wybrany dzień</span>
-        <span class="today-banner-text">${formatReadableDate(currentDate)}: ${listStr}</span>
-      </div>
-      <button class="btn btn-pill" onclick="openEventModal('${sampleDateStr}')">+ Dodaj do tego dnia</button>
-    `;
-  } else {
-    banner.style.display = 'none';
-  }
 }
 
 function renderView() {

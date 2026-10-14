@@ -464,42 +464,6 @@ body {
   border-radius: 50%;
 }
 
-/* Today highlight strip */
-.today-banner {
-  background: linear-gradient(135deg, #fff1f2 0%, #ffe4e6 100%);
-  border: 1px solid #fecdd3;
-  border-radius: var(--radius-md);
-  padding: 0.85rem 1.25rem;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-}
-
-.today-banner-content {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.today-banner-badge {
-  background: var(--primary);
-  color: #fff;
-  font-size: 0.75rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  padding: 0.25rem 0.6rem;
-  border-radius: var(--radius-full);
-}
-
-.today-banner-text {
-  font-size: 0.92rem;
-  font-weight: 600;
-  color: #881337;
-}
-
 /* ==========================================================================
    CALENDAR - MONTH VIEW (THE HEART OF THE APP!)
    ========================================================================== */
