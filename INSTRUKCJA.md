@@ -5,8 +5,8 @@ Dedykowana aplikacja do wygodnego wpisywania i zarządzania planem zajęć na st
 ---
 
 ## 🚀 Jak uruchomić?
-Aplikacja jest już dostępna na żywo w internecie:
-👉 **https://astonishing-gnome-8dd5fc.netlify.app**
+Aplikacja jest oficjalnie opublikowana pod Twoim stałym, darmowym adresem:
+👉 **https://lutovak.github.io/plan-zuzi/**
 
 Zuzia może otworzyć ten link na telefonie, iPadzie lub laptopie!
 Można go też otworzyć lokalnie z plików na komputerze:
