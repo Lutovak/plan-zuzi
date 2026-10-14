@@ -287,9 +287,27 @@ const PRESET_SUBJECTS = [
 ];
 
 // ==========================================================================
+// ==========================================================================
 // STATE
 // ==========================================================================
+const LOCATIONS_STORAGE_KEY = 'zuzia_schedule_locations_v1';
+const DEFAULT_LOCATIONS = [
+  'Banacha 1a - blok operacyjny',
+  'Banacha 1a - Centrum Symulacji',
+  'Ciołka 27 s. 101',
+  'Aula B',
+  'CD s. 211',
+  'CD s. 206',
+  'CBI s. 113',
+  'Litewska 14/16 s. 101',
+  'Nowogrodzka 59 pawilon 2A s. 128',
+  'Żwirki i Wigury 63A - sala kliniczna',
+  'ul. Pawińskiego 3C, s. 7 niski parter',
+  'Studium Języków Obcych'
+];
+
 let events = [];
+let locations = [];
 let currentDate = new Date(2026, 9, 1); // Październik 2026 (miesiące 0-indeksowane)
 let currentView = 'month';
 let activeFilterSubject = null;
@@ -300,6 +318,7 @@ let searchQuery = '';
 // ==========================================================================
 document.addEventListener('DOMContentLoaded', () => {
   loadEvents();
+  loadLocations();
   initQuickTemplates();
   initEventListeners();
   renderApp();
@@ -322,6 +341,99 @@ function loadEvents() {
 
 function saveEvents() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(events));
+}
+
+// Zarządzanie salami i szpitalami
+function loadLocations() {
+  const stored = localStorage.getItem(LOCATIONS_STORAGE_KEY);
+  if (stored) {
+    try {
+      locations = JSON.parse(stored);
+    } catch (e) {
+      locations = [...DEFAULT_LOCATIONS];
+    }
+  } else {
+    locations = [...DEFAULT_LOCATIONS];
+    saveLocations();
+  }
+  updateLocationDatalists();
+}
+
+function saveLocations() {
+  localStorage.setItem(LOCATIONS_STORAGE_KEY, JSON.stringify(locations));
+  updateLocationDatalists();
+}
+
+function addLocation(locName) {
+  const trimmed = locName.trim();
+  if (!trimmed) return false;
+  if (!locations.includes(trimmed)) {
+    locations.unshift(trimmed); // Dodaj na początek
+    saveLocations();
+    return true;
+  }
+  return false;
+}
+
+function removeLocation(locName) {
+  locations = locations.filter(l => l !== locName);
+  saveLocations();
+}
+
+function updateLocationDatalists() {
+  const datalist = document.getElementById('locationDatalist');
+  if (datalist) {
+    datalist.innerHTML = '';
+    locations.forEach(loc => {
+      const opt = document.createElement('option');
+      opt.value = loc;
+      datalist.appendChild(opt);
+    });
+  }
+}
+
+function openLocationsModal() {
+  renderLocationsList();
+  document.getElementById('locationsModal').style.display = 'flex';
+  const inp = document.getElementById('newLocationInput');
+  if (inp) {
+    inp.value = '';
+    inp.focus();
+  }
+}
+
+function closeLocationsModal() {
+  document.getElementById('locationsModal').style.display = 'none';
+}
+
+function renderLocationsList() {
+  const list = document.getElementById('locationsList');
+  const countBadge = document.getElementById('locationsCountBadge');
+  if (!list) return;
+
+  list.innerHTML = '';
+  if (countBadge) countBadge.textContent = locations.length;
+
+  if (locations.length === 0) {
+    list.innerHTML = `<div style="color: var(--text-muted); font-size: 0.85rem; padding: 1rem; text-align: center;">Brak zapisanych sal. Wpisz nazwę powyżej i kliknij Dodaj!</div>`;
+    return;
+  }
+
+  locations.forEach(loc => {
+    const item = document.createElement('div');
+    item.className = 'location-chip-item';
+    item.innerHTML = `
+      <span class="location-name">📍 ${escapeHtml(loc)}</span>
+      <button type="button" class="location-delete-btn" title="Usuń lokalizację">✕</button>
+    `;
+    item.querySelector('.location-delete-btn').addEventListener('click', (e) => {
+      e.stopPropagation();
+      removeLocation(loc);
+      renderLocationsList();
+      showToast(`Usunięto: ${loc}`);
+    });
+    list.appendChild(item);
+  });
 }
 
 function initQuickTemplates() {
@@ -482,11 +594,31 @@ function initEventListeners() {
   document.getElementById('cancelBlockModalBtn').addEventListener('click', closeBlockModal);
   document.getElementById('blockForm').addEventListener('submit', handleBlockFormSubmit);
 
+  // Modal: Sale i szpitale
+  document.getElementById('manageLocationsBtn').addEventListener('click', openLocationsModal);
+  document.getElementById('closeLocationsModalBtn').addEventListener('click', closeLocationsModal);
+  document.getElementById('closeLocationsBtn').addEventListener('click', closeLocationsModal);
+  document.getElementById('addLocationForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const input = document.getElementById('newLocationInput');
+    const val = input.value.trim();
+    if (val) {
+      if (addLocation(val)) {
+        renderLocationsList();
+        input.value = '';
+        showToast(`Dodano lokalizację: ${val}`);
+      } else {
+        showToast('Ta sala / lokalizacja już istnieje na liście!');
+      }
+    }
+  });
+
   // Zamykanie modali klawiszem ESC
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
       closeEventModal();
       closeBlockModal();
+      closeLocationsModal();
     }
   });
 }
@@ -962,6 +1094,10 @@ function handleEventFormSubmit(e) {
     showToast('Dodano nowe zajęcia');
   }
 
+  if (location) {
+    addLocation(location);
+  }
+
   saveEvents();
   closeEventModal();
   renderApp();
@@ -1068,6 +1204,10 @@ function handleBlockFormSubmit(e) {
       count++;
     }
     current.setDate(current.getDate() + 1);
+  }
+
+  if (location) {
+    addLocation(location);
   }
 
   saveEvents();

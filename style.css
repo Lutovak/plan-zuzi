@@ -1110,6 +1110,85 @@ body {
 }
 
 /* ==========================================================================
+   LOCATIONS MANAGEMENT MODAL
+   ========================================================================== */
+.add-location-bar {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.locations-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin-top: 0.5rem;
+}
+
+.badge-count {
+  background: var(--bg-card-subtle);
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  padding: 0.15rem 0.55rem;
+  border-radius: var(--radius-full);
+  font-weight: 700;
+}
+
+.locations-chips-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  max-height: 240px;
+  overflow-y: auto;
+  padding: 0.4rem;
+  background: var(--bg-page);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+}
+
+.location-chip-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.85rem;
+  border-radius: var(--radius-full);
+  background: #ffffff;
+  border: 1px solid var(--border-color);
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-main);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+  transition: all var(--transition-fast);
+}
+
+.location-chip-item:hover {
+  border-color: #cbd5e1;
+  transform: translateY(-1px);
+}
+
+.location-delete-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 0.72rem;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+  margin-left: 0.2rem;
+}
+
+.location-delete-btn:hover {
+  background: #fee2e2;
+  color: #ef4444;
+}
+
+/* ==========================================================================
    RESPONSIVE DESIGN & PRINT
    ========================================================================== */
 @media (max-width: 1024px) {

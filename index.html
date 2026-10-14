@@ -21,6 +21,9 @@
         </div>
       </div>
       <div class="header-actions">
+        <button id="manageLocationsBtn" class="btn btn-secondary">
+          <span class="btn-icon">📍</span> Sale i szpitale
+        </button>
         <button id="addBlockBtn" class="btn btn-secondary">
           <span class="btn-icon">⚡</span> Dodaj blok wielodniowy
         </button>
@@ -359,6 +362,39 @@
           <button type="submit" class="btn btn-primary">⚡ Wygeneruj blok zajęć</button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- MODAL: Zarządzanie Lokalizacjami / Salami / Szpitalami -->
+  <div class="modal-backdrop" id="locationsModal" style="display: none;">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div>
+          <h3>📍 Moje Szpitale i Sale</h3>
+          <p class="modal-subtitle">Dodaj swoje sale i szpitale, aby szybko wybierać je z podpowiedzi</p>
+        </div>
+        <button class="modal-close-btn" id="closeLocationsModalBtn">✕</button>
+      </div>
+      <div class="modal-form">
+        <form id="addLocationForm" class="add-location-bar">
+          <input type="text" id="newLocationInput" class="form-input" placeholder="Wpisz nazwę sali lub szpitala (np. Banacha 1a, blok op.)" required>
+          <button type="submit" class="btn btn-primary">＋ Dodaj salę</button>
+        </form>
+
+        <div class="locations-section">
+          <label class="form-label" style="display: flex; justify-content: space-between; align-items: center;">
+            <span>Zapisane lokalizacje:</span>
+            <span id="locationsCountBadge" class="badge-count">0</span>
+          </label>
+          <div class="locations-chips-list" id="locationsList">
+            <!-- Renderowane dynamicznie -->
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" id="closeLocationsBtn" class="btn btn-secondary" style="margin-left: auto;">Zamknij</button>
+        </div>
+      </div>
     </div>
   </div>
 
