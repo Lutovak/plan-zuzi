@@ -358,21 +358,27 @@ function selectColorRadio(name, colorHex) {
 // EVENT LISTENERS
 // ==========================================================================
 function initEventListeners() {
-  // Nawigacja miesięcy
+  // Nawigacja (Miesiąc / Tydzień)
   document.getElementById('prevMonthBtn').addEventListener('click', () => {
-    currentDate.setMonth(currentDate.getMonth() - 1);
+    if (currentView === 'week') {
+      currentDate.setDate(currentDate.getDate() - 7);
+    } else {
+      currentDate.setMonth(currentDate.getMonth() - 1);
+    }
     renderApp();
   });
 
   document.getElementById('nextMonthBtn').addEventListener('click', () => {
-    currentDate.setMonth(currentDate.getMonth() + 1);
+    if (currentView === 'week') {
+      currentDate.setDate(currentDate.getDate() + 7);
+    } else {
+      currentDate.setMonth(currentDate.getMonth() + 1);
+    }
     renderApp();
   });
 
   document.getElementById('todayBtn').addEventListener('click', () => {
-    // Jeśli w danych mamy październik 2026, przejdź do 2026-10, albo do dzisiejszego realnego dnia
-    const realToday = new Date();
-    // Jeśli mamy zajęcia w 2026-10, a dzisiaj jesteśmy w innym roku, dajemy wygodny powrót:
+    // Przejdź do października 2026 z planem Zuzi (np. do tygodnia z zajęciami 12.10.2026)
     currentDate = new Date(2026, 9, 14);
     renderApp();
     showToast('Przejście do planu Zuzi (Październik 2026)');
@@ -384,7 +390,33 @@ function initEventListeners() {
       document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
       e.target.classList.add('active');
       currentView = e.target.getAttribute('data-view');
-      renderView();
+
+      // Jeśli przełączamy na tydzień, upewnijmy się, że nie lądujemy na pustym przełomie września/października
+      if (currentView === 'week') {
+        const curr = new Date(currentDate);
+        const day = curr.getDay();
+        const diffToMonday = curr.getDate() - day + (day === 0 ? -6 : 1);
+        const monday = new Date(curr.setDate(diffToMonday));
+        
+        // Sprawdź czy w tym tygodniu są zajęcia
+        let hasEventsInWeek = false;
+        for (let i = 0; i < 7; i++) {
+          const d = new Date(monday);
+          d.setDate(monday.getDate() + i);
+          const key = formatDateKey(d);
+          if (events.some(ev => ev.date === key)) {
+            hasEventsInWeek = true;
+            break;
+          }
+        }
+
+        // Jeśli ten tydzień jest pusty, a mamy zajęcia w październiku 2026, ustawmy tydzień z zajęciami (12-16.10)
+        if (!hasEventsInWeek && currentDate.getFullYear() === 2026 && currentDate.getMonth() === 9) {
+          currentDate = new Date(2026, 9, 14);
+        }
+      }
+
+      renderApp();
     });
   });
 
@@ -474,8 +506,32 @@ function updatePeriodLabel() {
     'Styczeń', 'Luty', 'Marzec', 'Kwiecień', 'Maj', 'Czerwiec',
     'Lipiec', 'Sierpień', 'Wrzesień', 'Październik', 'Listopad', 'Grudzień'
   ];
-  const label = `${monthNames[currentDate.getMonth()]} ${currentDate.getFullYear()}`;
-  document.getElementById('currentMonthYearLabel').textContent = label;
+
+  if (currentView === 'week') {
+    const curr = new Date(currentDate);
+    const day = curr.getDay();
+    const diffToMonday = curr.getDate() - day + (day === 0 ? -6 : 1);
+    const mon = new Date(curr.setDate(diffToMonday));
+    const sun = new Date(mon);
+    sun.setDate(mon.getDate() + 6);
+
+    const monD = mon.getDate();
+    const sunD = sun.getDate();
+    const monM = monthNames[mon.getMonth()];
+    const sunM = monthNames[sun.getMonth()];
+    const yr = sun.getFullYear();
+
+    let label = '';
+    if (mon.getMonth() === sun.getMonth()) {
+      label = `${monD} – ${sunD} ${sunM} ${yr}`;
+    } else {
+      label = `${monD} ${monM} – ${sunD} ${sunM} ${yr}`;
+    }
+    document.getElementById('currentMonthYearLabel').textContent = label;
+  } else {
+    const label = `${monthNames[currentDate.getMonth()]} ${currentDate.getFullYear()}`;
+    document.getElementById('currentMonthYearLabel').textContent = label;
+  }
 }
 
 function renderFilterChips() {
@@ -682,6 +738,7 @@ function renderWeekView() {
   container.innerHTML = '';
 
   const dayNames = ['Poniedziałek', 'Wtorek', 'Środa', 'Czwartek', 'Piątek', 'Sobota', 'Niedziela'];
+  const monthShortNames = ['sty', 'lut', 'mar', 'kwi', 'maj', 'cze', 'lip', 'sie', 'wrz', 'paź', 'lis', 'gru'];
   const filteredEvents = getFilteredEvents();
 
   // Znajdź poniedziałek dla aktualnie wybranego dnia
@@ -701,13 +758,23 @@ function renderWeekView() {
       col.classList.add('is-today');
     }
 
+    const shortMonth = monthShortNames[dayDate.getMonth()];
+
     col.innerHTML = `
       <div class="week-day-header">
-        <div class="week-day-name">${dayNames[i]}</div>
-        <div class="week-day-date">${dayDate.getDate()}</div>
+        <div class="week-day-top">
+          <div class="week-day-name">${dayNames[i]}</div>
+          <button class="add-event-quick-btn" title="Dodaj zajęcia na ${dateStr}">＋</button>
+        </div>
+        <div class="week-day-date">${dayDate.getDate()} <span class="week-month-tag">${shortMonth}</span></div>
       </div>
       <div class="week-events-list" id="weekList-${dateStr}"></div>
     `;
+
+    col.querySelector('.add-event-quick-btn').addEventListener('click', (e) => {
+      e.stopPropagation();
+      openEventModal(dateStr);
+    });
 
     const listContainer = col.querySelector('.week-events-list');
     const dayEvents = filteredEvents
@@ -715,27 +782,34 @@ function renderWeekView() {
       .sort((a, b) => a.startTime.localeCompare(b.startTime));
 
     if (dayEvents.length === 0) {
-      listContainer.innerHTML = `<div style="color: var(--text-light); font-size: 0.8rem; text-align: center; margin-top: 1rem;">Brak zajęć</div>`;
+      listContainer.innerHTML = `<div class="week-empty-slot">＋ Kliknij, aby dodać</div>`;
     } else {
       dayEvents.forEach(ev => {
         const card = document.createElement('div');
-        card.className = 'event-tile';
+        card.className = 'event-tile week-event-card';
         card.style.borderLeftColor = ev.color || '#3b82f6';
         card.style.backgroundColor = getSubtleBgColor(ev.color || '#3b82f6');
-        card.style.padding = '0.6rem';
         card.innerHTML = `
-          <div class="event-time" style="font-size: 0.8rem;">
-            <span>${ev.startTime} - ${ev.endTime}</span>
+          <div class="event-time">
+            <span>⏰ ${ev.startTime} - ${ev.endTime}</span>
             ${ev.type ? `<span class="event-type-badge">${escapeHtml(ev.type)}</span>` : ''}
           </div>
-          <div class="event-title" style="font-size: 0.92rem; margin: 0.2rem 0;">${escapeHtml(ev.subject)}</div>
-          ${ev.location ? `<div class="event-location" style="display: flex;">📍 ${escapeHtml(ev.location)}</div>` : ''}
-          ${ev.notes ? `<div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 0.2rem;">📝 ${escapeHtml(ev.notes)}</div>` : ''}
+          <div class="event-title">${escapeHtml(ev.subject)}</div>
+          ${ev.location ? `<div class="event-location">📍 ${escapeHtml(ev.location)}</div>` : ''}
+          ${ev.notes ? `<div class="event-notes">📝 ${escapeHtml(ev.notes)}</div>` : ''}
         `;
-        card.addEventListener('click', () => openEventModal(null, ev.id));
+        card.addEventListener('click', (e) => {
+          e.stopPropagation();
+          openEventModal(null, ev.id);
+        });
         listContainer.appendChild(card);
       });
     }
+
+    // Kliknięcie w kolumnę dodaje zajęcia
+    col.addEventListener('click', () => {
+      openEventModal(dateStr);
+    });
 
     container.appendChild(col);
   }
