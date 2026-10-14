@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Plan Zajęć Zuzi 🩺</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;1,600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="header-left">
+        <div class="logo-badge">🩺</div>
+        <div class="title-group">
+          <h1>Plan Zajęć Zuzi <span class="heart-pulse">❤️</span></h1>
+          <p class="subtitle">Wygodny planer bloków klinicznych, ćwiczeń i wykładów</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button id="addBlockBtn" class="btn btn-secondary">
+          <span class="btn-icon">⚡</span> Dodaj blok wielodniowy
+        </button>
+        <button id="addEventBtn" class="btn btn-primary">
+          <span class="btn-icon">＋</span> Dodaj zajęcia
+        </button>
+        <div class="dropdown">
+          <button id="moreActionsBtn" class="btn btn-icon-only" title="Więcej opcji">⚙️</button>
+          <div class="dropdown-menu" id="moreActionsMenu">
+            <button id="exportIcsBtn" class="dropdown-item">📅 Eksportuj do Kalendarza (.ics)</button>
+            <button id="printBtn" class="dropdown-item">🖨️ Drukuj / Zapisz jako PDF</button>
+            <div class="dropdown-divider"></div>
+            <button id="exportJsonBtn" class="dropdown-item">💾 Pobierz kopię zapasową (JSON)</button>
+            <button id="importJsonBtn" class="dropdown-item">📂 Wczytaj kopię zapasową</button>
+            <input type="file" id="importFileInput" accept=".json" style="display:none;">
+            <div class="dropdown-divider"></div>
+            <button id="resetDataBtn" class="dropdown-item text-danger">🔄 Przywróć plan październikowy</button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Toolbar / Navigation -->
+    <section class="controls-bar">
+      <div class="nav-controls">
+        <button id="prevMonthBtn" class="nav-btn" title="Poprzedni miesiąc">‹</button>
+        <button id="todayBtn" class="btn btn-pill">Dzisiaj</button>
+        <button id="nextMonthBtn" class="nav-btn" title="Następny miesiąc">›</button>
+        <h2 id="currentMonthYearLabel" class="current-period-label">Październik 2026</h2>
+      </div>
+
+      <div class="view-and-filters">
+        <div class="search-box">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="searchInput" placeholder="Szukaj sali, szpitala, przedmiotu..." />
+          <button id="clearSearchBtn" class="clear-search-btn" style="display: none;">✕</button>
+        </div>
+
+        <div class="view-toggle">
+          <button class="view-btn active" data-view="month">Miesiąc</button>
+          <button class="view-btn" data-view="week">Tydzień</button>
+          <button class="view-btn" data-view="agenda">Agenda</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Quick Subject Filter Chips -->
+    <section class="subject-chips-bar" id="subjectFilterBar">
+      <span class="chips-label">Filtruj przedmiot:</span>
+      <div class="chips-container" id="chipsContainer">
+        <!-- Rendered dynamically -->
+      </div>
+    </section>
+
+    <!-- Stats / Today Highlight Strip -->
+    <div id="todayBanner" class="today-banner">
+      <!-- Generated dynamically if there are classes today/upcoming -->
+    </div>
+
+    <!-- Main Schedule Views Container -->
+    <main class="main-content">
+      <!-- Month View (Default) -->
+      <div id="monthView" class="view-container active">
+        <div class="calendar-grid-header">
+          <div>Poniedziałek</div>
+          <div>Wtorek</div>
+          <div>Środa</div>
+          <div>Czwartek</div>
+          <div>Piątek</div>
+          <div class="weekend-col">Sobota</div>
+          <div class="weekend-col">Niedziela</div>
+        </div>
+        <div class="calendar-grid-days" id="calendarDaysGrid">
+          <!-- Calendar cells rendered dynamically -->
+        </div>
+      </div>
+
+      <!-- Week View -->
+      <div id="weekView" class="view-container">
+        <div class="week-days-container" id="weekDaysContainer">
+          <!-- Week view rendered dynamically -->
+        </div>
+      </div>
+
+      <!-- Agenda View -->
+      <div id="agendaView" class="view-container">
+        <div class="agenda-list" id="agendaListContainer">
+          <!-- Agenda cards rendered dynamically -->
+        </div>
+      </div>
+    </main>
+
+    <!-- Footer Tips -->
+    <footer class="app-footer">
+      <div class="footer-tip">
+        💡 <strong>Wskazówka:</strong> Kliknij dowolny dzień w kalendarzu, aby szybko dodać zajęcia. Możesz też kliknąć w kafelek zajęć, aby go edytować lub usunąć.
+      </div>
+      <div class="footer-credit">
+        Stworzone z ❤️ dla Zuzi
+      </div>
+    </footer>
+  </div>
+
+  <!-- MODAL: Add / Edit Single Event -->
+  <div class="modal-backdrop" id="eventModal" style="display: none;">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="modalTitle">Dodaj nowe zajęcia</h3>
+        <button class="modal-close-btn" id="closeEventModalBtn">✕</button>
+      </div>
+      <form id="eventForm" class="modal-form">
+        <input type="hidden" id="eventId">
+
+        <!-- Szybkie szablony przedmiotów -->
+        <div class="form-group">
+          <label class="form-label">Szybki wybór przedmiotu:</label>
+          <div class="quick-templates-list" id="quickTemplatesList">
+            <!-- Buttons generated dynamically -->
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group flex-2">
+            <label for="eventSubject" class="form-label required">Nazwa przedmiotu / zajęć</label>
+            <input type="text" id="eventSubject" class="form-input" placeholder="np. Chirurgia i blok op." required list="subjectDatalist">
+            <datalist id="subjectDatalist">
+              <option value="Chirurgia i blok op.">
+              <option value="Chirurgia">
+              <option value="Farmakologia">
+              <option value="Podstawy Rehab.">
+              <option value="Pediatria">
+              <option value="Pediatria WZYN">
+              <option value="POZ">
+              <option value="Promocja zdrowia">
+              <option value="Angielski">
+              <option value="Interna">
+              <option value="Ginekologia i Położnictwo">
+              <option value="Neurologia">
+            </datalist>
+          </div>
+          <div class="form-group flex-1">
+            <label for="eventType" class="form-label">Typ zajęć</label>
+            <select id="eventType" class="form-input">
+              <option value="ćw.">Ćwiczenia</option>
+              <option value="blok op.">Blok operacyjny</option>
+              <option value="sem.">Seminarium</option>
+              <option value="W.">Wykład</option>
+              <option value="zajęcia prakt.">Zajęcia praktyczne</option>
+              <option value="zaliczenie">Zaliczenie / Egzamin</option>
+              <option value="inne">Inne</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="eventDate" class="form-label required">Data</label>
+            <input type="date" id="eventDate" class="form-input" required>
+          </div>
+          <div class="form-group">
+            <label for="eventStartTime" class="form-label required">Godzina od</label>
+            <input type="time" id="eventStartTime" class="form-input" required value="08:00">
+          </div>
+          <div class="form-group">
+            <label for="eventEndTime" class="form-label required">Godzina do</label>
+            <input type="time" id="eventEndTime" class="form-input" required value="14:00">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="eventLocation" class="form-label">Szpital / Budynek / Sala</label>
+          <input type="text" id="eventLocation" class="form-input" placeholder="np. Banacha 1a, blok op. / Ciołka 27 s. 101" list="locationDatalist">
+          <datalist id="locationDatalist">
+            <option value="Banacha 1a - blok operacyjny">
+            <option value="Ciołka 27 s. 101">
+            <option value="Aula B">
+            <option value="CD s. 211">
+            <option value="CD s. 206">
+            <option value="CBI s. 113">
+            <option value="Litewska 14/16 s. 101">
+            <option value="Nowogrodzka 59 pawilon 2A s. 128">
+            <option value="Żwirki i Wigury 63A - sala kliniczna">
+            <option value="Pawińskiego 3C, s. 7 niski parter">
+          </datalist>
+        </div>
+
+        <div class="form-group">
+          <label for="eventNotes" class="form-label">Prowadzący / Dodatkowe uwagi</label>
+          <input type="text" id="eventNotes" class="form-input" placeholder="np. fartuch medyczny, stetoskop, Prof. Z. Gałązka">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Kolor wyróżnienia</label>
+          <div class="color-palette" id="colorPickerGroup">
+            <label class="color-option">
+              <input type="radio" name="eventColor" value="#3b82f6" checked>
+              <span class="color-dot" style="background-color: #3b82f6;" title="Niebieski"></span>
+            </label>
+            <label class="color-option">
+              <input type="radio" name="eventColor" value="#10b981">
+              <span class="color-dot" style="background-color: #10b981;" title="Zielony / Miętowy"></span>
+            </label>
+            <label class="color-option">
+              <input type="radio" name="eventColor" value="#ec4899">
+              <span class="color-dot" style="background-color: #ec4899;" title="Różowy"></span>
+            </label>
+            <label class="color-option">
+              <input type="radio" name="eventColor" value="#8b5cf6">
+              <span class="color-dot" style="background-color: #8b5cf6;" title="Fioletowy"></span>
+            </label>
+            <label class="color-option">
+              <input type="radio" name="eventColor" value="#f59e0b">
+              <span class="color-dot" style="background-color: #f59e0b;" title="Bursztynowy"></span>
+            </label>
+            <label class="color-option">
+              <input type="radio" name="eventColor" value="#06b6d4">
+              <span class="color-dot" style="background-color: #06b6d4;" title="Morski / Turkus"></span>
+            </label>
+            <label class="color-option">
+              <input type="radio" name="eventColor" value="#ef4444">
+              <span class="color-dot" style="background-color: #ef4444;" title="Czerwony"></span>
+            </label>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" id="deleteEventBtn" class="btn btn-danger" style="display: none;">Usuń zajęcia</button>
+          <div class="footer-right-buttons">
+            <button type="button" id="cancelEventModalBtn" class="btn btn-secondary">Anuluj</button>
+            <button type="submit" class="btn btn-primary">Zapisz</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: Add Multi-day Block (Kluczowe na medycynę!) -->
+  <div class="modal-backdrop" id="blockModal" style="display: none;">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div>
+          <h3>⚡ Dodaj blok wielodniowy</h3>
+          <p class="modal-subtitle">Idealne dla bloków klinicznych trwających od poniedziałku do piątku</p>
+        </div>
+        <button class="modal-close-btn" id="closeBlockModalBtn">✕</button>
+      </div>
+      <form id="blockForm" class="modal-form">
+        <div class="form-row">
+          <div class="form-group flex-2">
+            <label for="blockSubject" class="form-label required">Przedmiot</label>
+            <input type="text" id="blockSubject" class="form-input" placeholder="np. Chirurgia i blok op." required list="subjectDatalist">
+          </div>
+          <div class="form-group flex-1">
+            <label for="blockType" class="form-label">Typ zajęć</label>
+            <select id="blockType" class="form-input">
+              <option value="blok op.">Blok operacyjny</option>
+              <option value="ćw.">Ćwiczenia</option>
+              <option value="sem.">Seminarium</option>
+              <option value="zajęcia prakt.">Zajęcia praktyczne</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="blockStartDate" class="form-label required">Od dnia</label>
+            <input type="date" id="blockStartDate" class="form-input" required>
+          </div>
+          <div class="form-group">
+            <label for="blockEndDate" class="form-label required">Do dnia (włącznie)</label>
+            <input type="date" id="blockEndDate" class="form-input" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Dni tygodnia:</label>
+          <div class="days-checkbox-group">
+            <label class="checkbox-pill"><input type="checkbox" name="blockDays" value="1" checked> Pon</label>
+            <label class="checkbox-pill"><input type="checkbox" name="blockDays" value="2" checked> Wt</label>
+            <label class="checkbox-pill"><input type="checkbox" name="blockDays" value="3" checked> Śr</label>
+            <label class="checkbox-pill"><input type="checkbox" name="blockDays" value="4" checked> Czw</label>
+            <label class="checkbox-pill"><input type="checkbox" name="blockDays" value="5" checked> Pt</label>
+            <label class="checkbox-pill"><input type="checkbox" name="blockDays" value="6"> Sob</label>
+            <label class="checkbox-pill"><input type="checkbox" name="blockDays" value="0"> Niedz</label>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="blockStartTime" class="form-label required">Godzina od</label>
+            <input type="time" id="blockStartTime" class="form-input" required value="08:00">
+          </div>
+          <div class="form-group">
+            <label for="blockEndTime" class="form-label required">Godzina do</label>
+            <input type="time" id="blockEndTime" class="form-input" required value="14:00">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="blockLocation" class="form-label">Szpital / Sala</label>
+          <input type="text" id="blockLocation" class="form-input" placeholder="np. Szpital Banacha 1a, chirurgia" list="locationDatalist">
+        </div>
+
+        <div class="form-group">
+          <label for="blockNotes" class="form-label">Prowadzący / Uwagi</label>
+          <input type="text" id="blockNotes" class="form-input" placeholder="np. Prof. Z. Gałązka">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Kolor wyróżnienia</label>
+          <div class="color-palette" id="blockColorPickerGroup">
+            <label class="color-option">
+              <input type="radio" name="blockColor" value="#3b82f6" checked>
+              <span class="color-dot" style="background-color: #3b82f6;"></span>
+            </label>
+            <label class="color-option">
+              <input type="radio" name="blockColor" value="#10b981">
+              <span class="color-dot" style="background-color: #10b981;"></span>
+            </label>
+            <label class="color-option">
+              <input type="radio" name="blockColor" value="#ec4899">
+              <span class="color-dot" style="background-color: #ec4899;"></span>
+            </label>
+            <label class="color-option">
+              <input type="radio" name="blockColor" value="#8b5cf6">
+              <span class="color-dot" style="background-color: #8b5cf6;"></span>
+            </label>
+            <label class="color-option">
+              <input type="radio" name="blockColor" value="#f59e0b">
+              <span class="color-dot" style="background-color: #f59e0b;"></span>
+            </label>
+            <label class="color-option">
+              <input type="radio" name="blockColor" value="#06b6d4">
+              <span class="color-dot" style="background-color: #06b6d4;"></span>
+            </label>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" id="cancelBlockModalBtn" class="btn btn-secondary">Anuluj</button>
+          <button type="submit" class="btn btn-primary">⚡ Wygeneruj blok zajęć</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="toast">Powiadomienie</div>
+
+  <script src="app.js"></script>
+</body>
+</html>
