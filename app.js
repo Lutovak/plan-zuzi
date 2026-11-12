@@ -691,6 +691,225 @@ let searchQuery = '';
 // ==========================================================================
 // INITIALIZATION
 // ==========================================================================
+
+// ==========================================================================
+// SYNCHRONIZACJA MIĘDZY URZĄDZENIAMI (FIREBASE & MAGIC LINK)
+// ==========================================================================
+const FIREBASE_STORAGE_KEY = 'zuzia_schedule_firebase_url';
+let syncDebounceTimer = null;
+
+function getFirebaseUrl() {
+  return localStorage.getItem(FIREBASE_STORAGE_KEY) || '';
+}
+
+function setFirebaseUrl(url) {
+  if (url) {
+    localStorage.setItem(FIREBASE_STORAGE_KEY, url);
+  } else {
+    localStorage.removeItem(FIREBASE_STORAGE_KEY);
+  }
+}
+
+function updateSyncIndicator(status, text) {
+  const pill = document.getElementById('cloudSyncIndicator');
+  const label = document.getElementById('syncStatusText');
+  if (!pill || !label) return;
+
+  pill.className = `sync-pill ${status}`;
+  label.textContent = text;
+}
+
+function openSyncModal() {
+  const modal = document.getElementById('syncModal');
+  const input = document.getElementById('firebaseUrlInput');
+  const statusMsg = document.getElementById('firebaseStatusMsg');
+  if (!modal) return;
+
+  const currentUrl = getFirebaseUrl();
+  if (input) input.value = currentUrl;
+  if (statusMsg) {
+    if (currentUrl) {
+      statusMsg.style.display = 'block';
+      statusMsg.style.color = '#10b981';
+      statusMsg.textContent = '🟢 Połączono z bazą w chmurze';
+    } else {
+      statusMsg.style.display = 'none';
+    }
+  }
+
+  modal.style.display = 'flex';
+}
+
+function closeSyncModal() {
+  const modal = document.getElementById('syncModal');
+  if (modal) modal.style.display = 'none';
+}
+
+// Błyskawiczny transfer planu przez Link (np. AirDrop, Messenger, SMS)
+async function generateShareLink() {
+  try {
+    updateSyncIndicator('syncing', 'Generuję link...');
+    const payload = {
+      events: events,
+      locations: locations,
+      updatedAt: Date.now()
+    };
+
+    let hash = '';
+    if (window.CompressionStream) {
+      const stream = new Blob([JSON.stringify(payload)]).stream();
+      const compressed = stream.pipeThrough(new CompressionStream('gzip'));
+      const buffer = await new Response(compressed).arrayBuffer();
+      let binary = '';
+      const bytes = new Uint8Array(buffer);
+      for (let i = 0; i < bytes.byteLength; i++) {
+        binary += String.fromCharCode(bytes[i]);
+      }
+      hash = 'gz_' + btoa(binary);
+    } else {
+      hash = 'raw_' + encodeURIComponent(JSON.stringify(payload));
+    }
+
+    const shareUrl = window.location.origin + window.location.pathname + '#sync=' + hash;
+    await navigator.clipboard.writeText(shareUrl);
+    updateSyncIndicator('synced', 'Link skopiowany!');
+    showToast('Skopiowano link z całym Twoim planem! ✨ Prześlij go na drugie urządzenie.');
+  } catch (err) {
+    console.error('Błąd generowania linku:', err);
+    updateSyncIndicator('error', 'Błąd');
+    showToast('Nie udało się skopiować do schowka.');
+  }
+}
+
+// Odczyt planu z linku po otwarciu na drugim urządzeniu
+async function checkHashSync() {
+  const hash = window.location.hash;
+  if (!hash || !hash.includes('sync=')) return;
+
+  try {
+    const syncVal = hash.split('sync=')[1];
+    let data = null;
+
+    if (syncVal.startsWith('gz_')) {
+      const b64 = syncVal.slice(3);
+      const binary = atob(b64);
+      const bytes = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i++) {
+        bytes[i] = binary.charCodeAt(i);
+      }
+      const stream = new Blob([bytes]).stream();
+      const decompressed = stream.pipeThrough(new DecompressionStream('gzip'));
+      const text = await new Response(decompressed).text();
+      data = JSON.parse(text);
+    } else if (syncVal.startsWith('raw_')) {
+      data = JSON.parse(decodeURIComponent(syncVal.slice(4)));
+    }
+
+    if (data && Array.isArray(data.events)) {
+      events = data.events;
+      saveEvents();
+      if (Array.isArray(data.locations)) {
+        locations = data.locations;
+        saveLocations();
+      }
+      renderApp();
+  checkHashSync();
+  syncFromFirebase(false);
+
+  // Automatyczne odświeżanie z chmury po powrocie do karty
+  window.addEventListener('focus', () => syncFromFirebase(false));
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) syncFromFirebase(false);
+  });
+      updateSyncIndicator('synced', 'Zaktualizowano z linku');
+      showToast('🎉 Twój plan został pomyślnie zaktualizowany i zapisany na tym urządzeniu!');
+
+      // Wyczyść hash z paska adresu
+      history.replaceState(null, '', window.location.pathname + window.location.search);
+    }
+  } catch (err) {
+    console.error('Błąd odczytu linku synchronizacji:', err);
+  }
+}
+
+// Zapis i odczyt z bazy Firebase Realtime Database
+async function syncToFirebase() {
+  const url = getFirebaseUrl();
+  if (!url) {
+    updateSyncIndicator('', 'Lokalnie');
+    return;
+  }
+
+  updateSyncIndicator('syncing', 'Zapisuję w chmurze...');
+  try {
+    const cleanUrl = url.replace(/\/$/, '') + '/schedule.json';
+    const res = await fetch(cleanUrl, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        events: events,
+        locations: locations,
+        updatedAt: Date.now()
+      })
+    });
+
+    if (!res.ok) throw new Error('Błąd zapisu: ' + res.status);
+    updateSyncIndicator('synced', 'W chmurze');
+  } catch (err) {
+    console.error('Błąd zapisu w chmurze Firebase:', err);
+    updateSyncIndicator('error', 'Błąd chmury');
+  }
+}
+
+async function syncFromFirebase(notify = false) {
+  const url = getFirebaseUrl();
+  if (!url) {
+    updateSyncIndicator('', 'Lokalnie');
+    return;
+  }
+
+  updateSyncIndicator('syncing', 'Sprawdzam chmurę...');
+  try {
+    const cleanUrl = url.replace(/\/$/, '') + '/schedule.json';
+    const res = await fetch(cleanUrl);
+    if (!res.ok) throw new Error('Błąd pobierania: ' + res.status);
+
+    const remoteData = await res.json();
+    if (remoteData && Array.isArray(remoteData.events)) {
+      events = remoteData.events;
+      saveEventsLocal();
+      if (Array.isArray(remoteData.locations)) {
+        locations = remoteData.locations;
+        saveLocationsLocal();
+      }
+      renderApp();
+      updateSyncIndicator('synced', 'W chmurze');
+      if (notify) showToast('Pobrano najnowszy plan z chmury! ☁️');
+    } else {
+      updateSyncIndicator('synced', 'W chmurze');
+    }
+  } catch (err) {
+    console.error('Błąd pobierania z Firebase:', err);
+    updateSyncIndicator('error', 'Błąd chmury');
+  }
+}
+
+function saveEventsLocal() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(events));
+}
+
+function saveLocationsLocal() {
+  localStorage.setItem(LOCATIONS_STORAGE_KEY, JSON.stringify(locations));
+  updateLocationDatalists();
+}
+
+function triggerCloudSyncDebounced() {
+  clearTimeout(syncDebounceTimer);
+  syncDebounceTimer = setTimeout(() => {
+    syncToFirebase();
+  }, 1000);
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   loadEvents();
   loadLocations();
@@ -736,7 +955,8 @@ function loadEvents() {
 }
 
 function saveEvents() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(events));
+  saveEventsLocal();
+  triggerCloudSyncDebounced();
 }
 
 // Zarządzanie salami i szpitalami
@@ -876,6 +1096,55 @@ function selectColorRadio(name, colorHex) {
 // EVENT LISTENERS
 // ==========================================================================
 function initEventListeners() {
+
+  // Synchronizacja
+  const syncBtn = document.getElementById('cloudSyncIndicator');
+  if (syncBtn) syncBtn.addEventListener('click', openSyncModal);
+
+  const menuSync = document.getElementById('menuSyncBtn');
+  if (menuSync) menuSync.addEventListener('click', openSyncModal);
+
+  const closeSyncBtn = document.getElementById('closeSyncModalBtn');
+  if (closeSyncBtn) closeSyncBtn.addEventListener('click', closeSyncModal);
+
+  const copyShareBtn = document.getElementById('copyShareLinkBtn');
+  if (copyShareBtn) copyShareBtn.addEventListener('click', generateShareLink);
+
+  const saveFbBtn = document.getElementById('saveFirebaseBtn');
+  if (saveFbBtn) {
+    saveFbBtn.addEventListener('click', () => {
+      const inp = document.getElementById('firebaseUrlInput');
+      const val = inp ? inp.value.trim() : '';
+      if (!val) {
+        alert('Wpisz poprawny adres bazy Firebase.');
+        return;
+      }
+      setFirebaseUrl(val);
+      syncToFirebase();
+      openSyncModal();
+      showToast('Zapisano adres bazy i wysłano plan do chmury! ☁️');
+    });
+  }
+
+  const pullFbBtn = document.getElementById('pullFirebaseBtn');
+  if (pullFbBtn) {
+    pullFbBtn.addEventListener('click', () => {
+      syncFromFirebase(true);
+    });
+  }
+
+  const discFbBtn = document.getElementById('disconnectFirebaseBtn');
+  if (discFbBtn) {
+    discFbBtn.addEventListener('click', () => {
+      if (confirm('Czy na pewno chcesz odłączyć bazę w chmurze?')) {
+        setFirebaseUrl('');
+        updateSyncIndicator('', 'Lokalnie');
+        openSyncModal();
+        showToast('Odłączono bazę w chmurze.');
+      }
+    });
+  }
+
   // Nawigacja (Miesiąc / Tydzień)
   document.getElementById('prevMonthBtn').addEventListener('click', () => {
     if (currentView === 'week') {

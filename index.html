@@ -21,6 +21,10 @@
         </div>
       </div>
       <div class="header-actions">
+        <div id="cloudSyncIndicator" class="sync-pill" title="Status synchronizacji (kliknij, aby otworzyć)">
+          <span class="sync-dot"></span>
+          <span id="syncStatusText">Lokalnie</span>
+        </div>
         <button id="manageLocationsBtn" class="btn btn-secondary">
           <span class="btn-icon">📍</span> Sale i szpitale
         </button>
@@ -40,6 +44,7 @@
             <button id="importJsonBtn" class="dropdown-item">📂 Wczytaj kopię zapasową</button>
             <input type="file" id="importFileInput" accept=".json" style="display:none;">
             <div class="dropdown-divider"></div>
+            <button id="menuSyncBtn" class="dropdown-item">☁️ Synchronizacja między urządzeniami</button>
             <button id="resetDataBtn" class="dropdown-item text-danger">🔄 Przywróć oryginalny plan</button>
           </div>
         </div>
@@ -402,5 +407,53 @@
   <div id="toast" class="toast">Powiadomienie</div>
 
   <script src="app.js?v=2"></script>
+
+  <!-- MODAL: Synchronizacja Między Urządzeniami -->
+  <div class="modal-backdrop" id="syncModal" style="display: none;">
+    <div class="modal-card modal-sync-card">
+      <div class="modal-header">
+        <div>
+          <h3>☁️ Synchronizacja Między Urządzeniami</h3>
+          <p class="modal-subtitle">Przenoś i synchronizuj plan między telefonem, iPadem i laptopem</p>
+        </div>
+        <button class="modal-close-btn" id="closeSyncModalBtn">✕</button>
+      </div>
+      <div class="modal-form" style="padding: 1.5rem;">
+        
+        <!-- Sekcja 1: Błyskawiczny transfer linkiem -->
+        <div class="sync-card-section">
+          <h4>📲 1. Błyskawiczne przesłanie na drugie urządzenie (Link / AirDrop)</h4>
+          <p class="text-muted" style="font-size: 0.9rem; margin-bottom: 0.75rem;">
+            Zmieniłaś coś na telefonie? Kliknij poniżej, aby wygenerować link ze wszystkimi Twoimi zmianami. Wyślij go sobie (AirDrop, Messenger, WhatsApp, Notatki) i otwórz na iPadzie lub laptopie – plan od razu się tam zaktualizuje!
+          </p>
+          <button type="button" id="copyShareLinkBtn" class="btn btn-primary" style="width: 100%; justify-content: center; padding: 0.75rem;">
+            🔗 Skopiuj link ze swoim planem
+          </button>
+        </div>
+
+        <div class="dropdown-divider" style="margin: 1.5rem 0;"></div>
+
+        <!-- Sekcja 2: Ciągła automatyczna chmura -->
+        <div class="sync-card-section">
+          <h4>☁️ 2. Automatyczna chmura w czasie rzeczywistym (Google Firebase)</h4>
+          <p class="text-muted" style="font-size: 0.9rem; margin-bottom: 0.75rem;">
+            Chcesz, aby każda zmiana na telefonie <strong>automatycznie bez wysyłania linków</strong> pojawiała się na iPadzie i laptopie? Podłącz darmową bazę Google Firebase.
+          </p>
+          <div class="form-group" style="margin-bottom: 0.75rem;">
+            <label class="form-label" for="firebaseUrlInput">Adres bazy Firebase (URL):</label>
+            <input type="url" id="firebaseUrlInput" class="form-input" placeholder="np. https://twoj-projekt-default-rtdb.firebaseio.com" />
+          </div>
+          <div style="display: flex; gap: 0.5rem; margin-bottom: 0.75rem; flex-wrap: wrap;">
+            <button type="button" id="saveFirebaseBtn" class="btn btn-primary" style="flex: 1;">💾 Połącz bazę</button>
+            <button type="button" id="pullFirebaseBtn" class="btn btn-secondary">🔄 Pobierz z chmury</button>
+            <button type="button" id="disconnectFirebaseBtn" class="btn btn-secondary text-danger">Odłącz</button>
+          </div>
+          <div id="firebaseStatusMsg" style="font-size: 0.85rem; font-weight: 600; display: none;"></div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
 </body>
 </html>

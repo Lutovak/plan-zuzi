@@ -1269,3 +1269,57 @@ body {
     page-break-inside: avoid;
   }
 }
+
+
+/* ==========================================================================
+   SYNC PILL & MODAL
+   ========================================================================== */
+.sync-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.75rem;
+  background: #f1f5f9;
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.sync-pill:hover {
+  background: #e2e8f0;
+}
+
+.sync-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #94a3b8;
+  transition: background 0.3s ease;
+}
+
+.sync-pill.synced .sync-dot {
+  background: #10b981;
+}
+
+.sync-pill.syncing .sync-dot {
+  background: #f59e0b;
+}
+
+.sync-pill.error .sync-dot {
+  background: #ef4444;
+}
+
+.modal-sync-card {
+  max-width: 520px;
+}
+
+.sync-card-section h4 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 0.4rem;
+}
