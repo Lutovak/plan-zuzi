@@ -696,10 +696,11 @@ let searchQuery = '';
 // SYNCHRONIZACJA MIĘDZY URZĄDZENIAMI (FIREBASE & MAGIC LINK)
 // ==========================================================================
 const FIREBASE_STORAGE_KEY = 'zuzia_schedule_firebase_url';
+const DEFAULT_FIREBASE_URL = 'https://plan-zuzi-default-rtdb.europe-west1.firebasedatabase.app';
 let syncDebounceTimer = null;
 
 function getFirebaseUrl() {
-  return localStorage.getItem(FIREBASE_STORAGE_KEY) || '';
+  return localStorage.getItem(FIREBASE_STORAGE_KEY) || DEFAULT_FIREBASE_URL;
 }
 
 function setFirebaseUrl(url) {
