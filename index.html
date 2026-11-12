@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;1,600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css?v=2">
 </head>
 <body>
   <div class="app-container">
@@ -40,7 +40,7 @@
             <button id="importJsonBtn" class="dropdown-item">📂 Wczytaj kopię zapasową</button>
             <input type="file" id="importFileInput" accept=".json" style="display:none;">
             <div class="dropdown-divider"></div>
-            <button id="resetDataBtn" class="dropdown-item text-danger">🔄 Przywróć plan październikowy</button>
+            <button id="resetDataBtn" class="dropdown-item text-danger">🔄 Przywróć oryginalny plan</button>
           </div>
         </div>
       </div>
@@ -52,7 +52,7 @@
         <button id="prevMonthBtn" class="nav-btn" title="Poprzedni miesiąc">‹</button>
         <button id="todayBtn" class="btn btn-pill">Dzisiaj</button>
         <button id="nextMonthBtn" class="nav-btn" title="Następny miesiąc">›</button>
-        <h2 id="currentMonthYearLabel" class="current-period-label">Październik 2026</h2>
+        <h2 id="currentMonthYearLabel" class="current-period-label">Listopad 2026</h2>
       </div>
 
       <div class="view-and-filters">
@@ -401,6 +401,6 @@
   <!-- Toast Notification -->
   <div id="toast" class="toast">Powiadomienie</div>
 
-  <script src="app.js"></script>
+  <script src="app.js?v=2"></script>
 </body>
 </html>

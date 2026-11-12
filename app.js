@@ -2,7 +2,7 @@
 // PLAN ZAJĘĆ DLA ZUZI ❤️ - LOGIKA APLIKACJI
 // ==========================================================================
 
-const STORAGE_KEY = 'zuzia_schedule_events_v1';
+const STORAGE_KEY = 'zuzia_schedule_events_v2';
 
 // Początkowe dane załadowane z rzeczywistego planu Zuzi z października 2026
 const DEFAULT_EVENTS = [
@@ -271,44 +271,419 @@ const DEFAULT_EVENTS = [
     location: 'Banacha 1a',
     notes: 'Prof. Z. Gałązka',
     color: '#3b82f6'
+  },
+  // ========================================================================
+  // LISTOPAD 2026
+  // ========================================================================
+  // 2 Listopada 2026 (Poniedziałek)
+  {
+    id: 'evt-2026-11-02-1',
+    date: '2026-11-02',
+    startTime: '08:00',
+    endTime: '14:00',
+    subject: 'Chirurgia i blok op.',
+    type: 'blok op.',
+    location: 'Banacha 1a',
+    notes: 'Zajęcia praktyczne, prof. Z. Gałązka',
+    color: '#3b82f6'
+  },
+  {
+    id: 'evt-2026-11-02-2',
+    date: '2026-11-02',
+    startTime: '16:30',
+    endTime: '18:00',
+    subject: 'Angielski',
+    type: 'ćw.',
+    location: 'Studium Języków Obcych',
+    notes: '',
+    color: '#f59e0b'
+  },
+  // 3 Listopada 2026 (Wtorek)
+  {
+    id: 'evt-2026-11-03-1',
+    date: '2026-11-03',
+    startTime: '08:00',
+    endTime: '14:00',
+    subject: 'Chirurgia i blok op.',
+    type: 'blok op.',
+    location: 'CSM, ul. Pawińskiego 3a',
+    notes: 'Zajęcia praktyczne, prof. Z. Gałązka',
+    color: '#3b82f6'
+  },
+  {
+    id: 'evt-2026-11-03-2',
+    date: '2026-11-03',
+    startTime: '15:00',
+    endTime: '17:15',
+    subject: 'Pediatria',
+    type: 'W.',
+    location: 'Aula B',
+    notes: 'Wykład z pediatrii',
+    color: '#ec4899'
+  },
+  // 4 Listopada 2026 (Środa)
+  {
+    id: 'evt-2026-11-04-1',
+    date: '2026-11-04',
+    startTime: '08:00',
+    endTime: '14:00',
+    subject: 'Chirurgia i blok op.',
+    type: 'blok op.',
+    location: 'Banacha 1a',
+    notes: 'Zajęcia praktyczne, prof. Z. Gałązka',
+    color: '#3b82f6'
+  },
+  // 5 Listopada 2026 (Czwartek)
+  {
+    id: 'evt-2026-11-05-1',
+    date: '2026-11-05',
+    startTime: '08:00',
+    endTime: '14:00',
+    subject: 'Chirurgia i blok op.',
+    type: 'blok op.',
+    location: 'Banacha 1a',
+    notes: 'Zajęcia praktyczne, prof. Z. Gałązka',
+    color: '#3b82f6'
+  },
+  // 6 Listopada 2026 (Piątek)
+  {
+    id: 'evt-2026-11-06-1',
+    date: '2026-11-06',
+    startTime: '08:00',
+    endTime: '14:00',
+    subject: 'Chirurgia i blok op.',
+    type: 'blok op.',
+    location: 'Banacha 1a',
+    notes: 'Zajęcia praktyczne, prof. Z. Gałązka',
+    color: '#3b82f6'
+  },
+  // 9 Listopada 2026 (Poniedziałek)
+  {
+    id: 'evt-2026-11-09-1',
+    date: '2026-11-09',
+    startTime: '08:00',
+    endTime: '14:00',
+    subject: 'Pediatria',
+    type: 'ćw.',
+    location: 'Żwirki i Wigury 63A',
+    notes: 'Zajęcia praktyczne, prof. P. Bagna',
+    color: '#ec4899'
+  },
+  {
+    id: 'evt-2026-11-09-2',
+    date: '2026-11-09',
+    startTime: '16:30',
+    endTime: '18:00',
+    subject: 'Angielski',
+    type: 'ćw.',
+    location: 'Studium Języków Obcych',
+    notes: '',
+    color: '#f59e0b'
+  },
+  // 10 Listopada 2026 (Wtorek)
+  {
+    id: 'evt-2026-11-10-1',
+    date: '2026-11-10',
+    startTime: '08:00',
+    endTime: '14:00',
+    subject: 'Pediatria',
+    type: 'ćw.',
+    location: 'CSM, ul. Pawińskiego 3c',
+    notes: 'Zajęcia praktyczne CSM, prof. P. Bagna',
+    color: '#ec4899'
+  },
+  {
+    id: 'evt-2026-11-10-2',
+    date: '2026-11-10',
+    startTime: '15:00',
+    endTime: '17:15',
+    subject: 'Chirurgia',
+    type: 'W.',
+    location: 'Aula B',
+    notes: 'Wykład z chirurgii',
+    color: '#3b82f6'
+  },
+  // 11 Listopada 2026 (Środa)
+  {
+    id: 'evt-2026-11-11-1',
+    date: '2026-11-11',
+    startTime: '08:00',
+    endTime: '14:00',
+    subject: 'Pediatria',
+    type: 'ćw.',
+    location: 'Żwirki i Wigury 63A',
+    notes: 'Zajęcia praktyczne, prof. P. Bagna',
+    color: '#ec4899'
+  },
+  // 12 Listopada 2026 (Czwartek)
+  {
+    id: 'evt-2026-11-12-1',
+    date: '2026-11-12',
+    startTime: '08:00',
+    endTime: '14:00',
+    subject: 'Pediatria',
+    type: 'ćw.',
+    location: 'Żwirki i Wigury 63A',
+    notes: 'Zajęcia praktyczne, prof. P. Bagna',
+    color: '#ec4899'
+  },
+  {
+    id: 'evt-2026-11-12-2',
+    date: '2026-11-12',
+    startTime: '15:00',
+    endTime: '18:45',
+    subject: 'Interna',
+    type: 'W.',
+    location: 'Aula A',
+    notes: 'Wykład z interny (W. INTERNA)',
+    color: '#10b981'
+  },
+  // 13 Listopada 2026 (Piątek)
+  {
+    id: 'evt-2026-11-13-1',
+    date: '2026-11-13',
+    startTime: '08:00',
+    endTime: '14:00',
+    subject: 'Pediatria',
+    type: 'ćw.',
+    location: 'Żwirki i Wigury 63A',
+    notes: 'Zajęcia praktyczne, prof. P. Bagna',
+    color: '#ec4899'
+  },
+  {
+    id: 'evt-2026-11-13-2',
+    date: '2026-11-13',
+    startTime: '15:15',
+    endTime: '19:00',
+    subject: 'Chirurgia',
+    type: 'sem.',
+    location: 'Nowogrodzka 59 pawilon 2A s. 128',
+    notes: 'Chirurgia seminarium, sala 128 (N29)',
+    color: '#3b82f6'
+  },
+  // 16 Listopada 2026 (Poniedziałek)
+  {
+    id: 'evt-2026-11-16-1',
+    date: '2026-11-16',
+    startTime: '08:00',
+    endTime: '14:00',
+    subject: 'Pediatria',
+    type: 'ćw.',
+    location: 'Żwirki i Wigury 63A',
+    notes: 'Zajęcia praktyczne, prof. P. Bagna',
+    color: '#ec4899'
+  },
+  {
+    id: 'evt-2026-11-16-2',
+    date: '2026-11-16',
+    startTime: '16:30',
+    endTime: '18:00',
+    subject: 'Angielski',
+    type: 'ćw.',
+    location: 'Studium Języków Obcych',
+    notes: '',
+    color: '#f59e0b'
+  },
+  // 17 Listopada 2026 (Wtorek)
+  {
+    id: 'evt-2026-11-17-1',
+    date: '2026-11-17',
+    startTime: '08:00',
+    endTime: '14:00',
+    subject: 'Pediatria',
+    type: 'ćw.',
+    location: 'CSM, ul. Pawińskiego 3c',
+    notes: 'Zajęcia praktyczne CSM, prof. P. Bagna',
+    color: '#ec4899'
+  },
+  {
+    id: 'evt-2026-11-17-2',
+    date: '2026-11-17',
+    startTime: '15:00',
+    endTime: '17:15',
+    subject: 'POZ',
+    type: 'W.',
+    location: 'Aula B',
+    notes: 'Wykład z POZ',
+    color: '#06b6d4'
+  },
+  // 18 Listopada 2026 (Środa)
+  {
+    id: 'evt-2026-11-18-1',
+    date: '2026-11-18',
+    startTime: '08:00',
+    endTime: '14:00',
+    subject: 'Pediatria',
+    type: 'ćw.',
+    location: 'Żwirki i Wigury 63A',
+    notes: 'Zajęcia praktyczne, prof. P. Bagna',
+    color: '#ec4899'
+  },
+  {
+    id: 'evt-2026-11-18-2',
+    date: '2026-11-18',
+    startTime: '15:45',
+    endTime: '19:30',
+    subject: 'Interna',
+    type: 'sem.',
+    location: 'Nowogrodzka 59 s. 210 (N29)',
+    notes: 'Interna seminaria, sala 210 (N29)',
+    color: '#10b981'
+  },
+  // 19 Listopada 2026 (Czwartek)
+  {
+    id: 'evt-2026-11-19-1',
+    date: '2026-11-19',
+    startTime: '08:00',
+    endTime: '14:00',
+    subject: 'Pediatria',
+    type: 'ćw.',
+    location: 'Żwirki i Wigury 63A',
+    notes: 'Zajęcia praktyczne, prof. P. Bagna',
+    color: '#ec4899'
+  },
+  {
+    id: 'evt-2026-11-19-2',
+    date: '2026-11-19',
+    startTime: '15:00',
+    endTime: '18:45',
+    subject: 'Interna',
+    type: 'W.',
+    location: 'Aula A',
+    notes: 'Wykład z interny (W. INTERNA)',
+    color: '#10b981'
+  },
+  // 20 Listopada 2026 (Piątek)
+  {
+    id: 'evt-2026-11-20-1',
+    date: '2026-11-20',
+    startTime: '08:00',
+    endTime: '14:00',
+    subject: 'Pediatria',
+    type: 'ćw.',
+    location: 'Żwirki i Wigury 63A',
+    notes: 'Zajęcia praktyczne, prof. P. Bagna',
+    color: '#ec4899'
+  },
+  // 23 Listopada 2026 (Poniedziałek)
+  {
+    id: 'evt-2026-11-23-1',
+    date: '2026-11-23',
+    startTime: '16:30',
+    endTime: '18:00',
+    subject: 'Angielski',
+    type: 'ćw.',
+    location: 'Studium Języków Obcych',
+    notes: '',
+    color: '#f59e0b'
+  },
+  // 24 Listopada 2026 (Wtorek)
+  {
+    id: 'evt-2026-11-24-1',
+    date: '2026-11-24',
+    startTime: '15:00',
+    endTime: '17:15',
+    subject: 'POZ',
+    type: 'W.',
+    location: 'Aula B',
+    notes: 'Wykład z POZ',
+    color: '#06b6d4'
+  },
+  // 25 Listopada 2026 (Środa)
+  {
+    id: 'evt-2026-11-25-1',
+    date: '2026-11-25',
+    startTime: '15:00',
+    endTime: '18:45',
+    subject: 'Promocja zdrowia',
+    type: 'sem.',
+    location: 'CBI s. 118',
+    notes: 'Seminarium z promocji zdrowia',
+    color: '#ec4899'
+  },
+  // 26 Listopada 2026 (Czwartek)
+  {
+    id: 'evt-2026-11-26-1',
+    date: '2026-11-26',
+    startTime: '15:00',
+    endTime: '18:45',
+    subject: 'Interna',
+    type: 'W.',
+    location: 'Aula A',
+    notes: 'Wykład z interny (W. INTERNA)',
+    color: '#10b981'
+  },
+  // 27 Listopada 2026 (Piątek)
+  {
+    id: 'evt-2026-11-27-1',
+    date: '2026-11-27',
+    startTime: '15:15',
+    endTime: '18:00',
+    subject: 'Interna',
+    type: 'sem.',
+    location: 'Nowogrodzka 59 pawilon VII (Hematologia)',
+    notes: 'Interna seminarium, sala seminaryjna pawilon nr VII, ul. Nowogrodzka 59 (oddz. Hematologii)',
+    color: '#10b981'
+  },
+  // 30 Listopada 2026 (Poniedziałek)
+  {
+    id: 'evt-2026-11-30-1',
+    date: '2026-11-30',
+    startTime: '16:30',
+    endTime: '18:00',
+    subject: 'Angielski',
+    type: 'ćw.',
+    location: 'Studium Języków Obcych',
+    notes: '',
+    color: '#f59e0b'
   }
 ];
 
 // Szablony szybkiego dodawania
 const PRESET_SUBJECTS = [
-  { name: 'Chirurgia i blok op.', type: 'blok op.', location: 'Banacha 1a, blok operacyjny', color: '#3b82f6' },
-  { name: 'Podstawy Rehab.', type: 'ćw.', location: 'Ciołka 27 s. 101', color: '#10b981' },
-  { name: 'Farmakologia', type: 'sem.', location: 'CD s. 206', color: '#8b5cf6' },
-  { name: 'Pediatria', type: 'sem.', location: 'Żwirki i Wigury 63A', color: '#ec4899' },
+  { name: 'Chirurgia i blok op.', type: 'blok op.', location: 'Banacha 1a', color: '#3b82f6' },
+  { name: 'Pediatria (ćw.)', type: 'ćw.', location: 'Żwirki i Wigury 63A', color: '#ec4899' },
+  { name: 'Interna (sem.)', type: 'sem.', location: 'Nowogrodzka 59 pawilon VII (Hematologia)', color: '#10b981' },
+  { name: 'W. Interna', type: 'W.', location: 'Aula A', color: '#10b981' },
+  { name: 'W. Chirurgia', type: 'W.', location: 'Aula B', color: '#3b82f6' },
+  { name: 'W. Pediatria', type: 'W.', location: 'Aula B', color: '#ec4899' },
+  { name: 'W. POZ', type: 'W.', location: 'Aula B', color: '#06b6d4' },
   { name: 'POZ', type: 'sem.', location: 'Pato, Litewska 14/16 s. 101', color: '#06b6d4' },
-  { name: 'Angielski', type: 'ćw.', location: 'Studium Języków Obcych', color: '#f59e0b' },
-  { name: 'Promocja zdrowia', type: 'sem.', location: 'CBI s. 113', color: '#ec4899' },
-  { name: 'W. Chirurgia', type: 'W.', location: 'Aula B', color: '#3b82f6' }
+  { name: 'Promocja zdrowia', type: 'sem.', location: 'CBI s. 118', color: '#ec4899' },
+  { name: 'Farmakologia', type: 'sem.', location: 'CD s. 206', color: '#8b5cf6' },
+  { name: 'Podstawy Rehab.', type: 'ćw.', location: 'Ciołka 27 s. 101', color: '#10b981' },
+  { name: 'Angielski', type: 'ćw.', location: 'Studium Języków Obcych', color: '#f59e0b' }
 ];
 
 // ==========================================================================
 // ==========================================================================
 // STATE
 // ==========================================================================
-const LOCATIONS_STORAGE_KEY = 'zuzia_schedule_locations_v1';
+const LOCATIONS_STORAGE_KEY = 'zuzia_schedule_locations_v2';
 const DEFAULT_LOCATIONS = [
   'Banacha 1a - blok operacyjny',
   'Banacha 1a - Centrum Symulacji',
-  'Ciołka 27 s. 101',
+  'CSM, ul. Pawińskiego 3a',
+  'CSM, ul. Pawińskiego 3c',
+  'Żwirki i Wigury 63A - sala kliniczna',
+  'Nowogrodzka 59 pawilon 2A s. 128',
+  'Nowogrodzka 59 pawilon VII (Hematologia)',
+  'Nowogrodzka 59 s. 210 (N29)',
+  'Aula A',
   'Aula B',
+  'CBI s. 118',
+  'CBI s. 113',
   'CD s. 211',
   'CD s. 206',
-  'CBI s. 113',
+  'Ciołka 27 s. 101',
   'Litewska 14/16 s. 101',
-  'Nowogrodzka 59 pawilon 2A s. 128',
-  'Żwirki i Wigury 63A - sala kliniczna',
   'ul. Pawińskiego 3C, s. 7 niski parter',
   'Studium Języków Obcych'
 ];
 
 let events = [];
 let locations = [];
-let currentDate = new Date(2026, 9, 1); // Październik 2026 (miesiące 0-indeksowane)
+let currentDate = new Date(2026, 10, 1); // Listopad 2026 (miesiące 0-indeksowane: 10 = listopad)
 let currentView = 'month';
 let activeFilterSubject = null;
 let searchQuery = '';
@@ -329,12 +704,33 @@ function loadEvents() {
   if (stored) {
     try {
       events = JSON.parse(stored);
+      // Gwarancja: jeśli w pamięci brakuje jakichkolwiek domyślnych zajęć (np. z listopada), automatycznie je dołączamy!
+      const existingIds = new Set(events.map(ev => ev.id));
+      const missingEvents = DEFAULT_EVENTS.filter(ev => !existingIds.has(ev.id));
+      if (missingEvents.length > 0) {
+        events = [...events, ...missingEvents];
+        saveEvents();
+      }
     } catch (e) {
       console.error('Błąd parsowania zapisanych danych, używam domyślnych:', e);
       events = [...DEFAULT_EVENTS];
+      saveEvents();
     }
   } else {
-    events = [...DEFAULT_EVENTS];
+    // Sprawdź czy użytkownik ma wcześniejszą wersję v1 z października
+    const storedV1 = localStorage.getItem('zuzia_schedule_events_v1');
+    if (storedV1) {
+      try {
+        const v1Events = JSON.parse(storedV1);
+        const existingIds = new Set(v1Events.map(ev => ev.id));
+        const newEventsToAdd = DEFAULT_EVENTS.filter(ev => !existingIds.has(ev.id));
+        events = [...v1Events, ...newEventsToAdd];
+      } catch (e) {
+        events = [...DEFAULT_EVENTS];
+      }
+    } else {
+      events = [...DEFAULT_EVENTS];
+    }
     saveEvents();
   }
 }
@@ -353,7 +749,17 @@ function loadLocations() {
       locations = [...DEFAULT_LOCATIONS];
     }
   } else {
-    locations = [...DEFAULT_LOCATIONS];
+    const storedV1 = localStorage.getItem('zuzia_schedule_locations_v1');
+    if (storedV1) {
+      try {
+        const v1Locs = JSON.parse(storedV1);
+        locations = Array.from(new Set([...v1Locs, ...DEFAULT_LOCATIONS]));
+      } catch (e) {
+        locations = [...DEFAULT_LOCATIONS];
+      }
+    } else {
+      locations = [...DEFAULT_LOCATIONS];
+    }
     saveLocations();
   }
   updateLocationDatalists();
@@ -490,10 +896,10 @@ function initEventListeners() {
   });
 
   document.getElementById('todayBtn').addEventListener('click', () => {
-    // Przejdź do października 2026 z planem Zuzi (np. do tygodnia z zajęciami 12.10.2026)
-    currentDate = new Date(2026, 9, 14);
+    // Przejdź do bieżącego widoku (Listopad 2026)
+    currentDate = new Date(2026, 10, 12);
     renderApp();
-    showToast('Przejście do planu Zuzi (Październik 2026)');
+    showToast('Przejście do planu Zuzi (Listopad 2026)');
   });
 
   // Przełączanie widoków (Miesiąc / Tydzień / Agenda)
@@ -523,7 +929,9 @@ function initEventListeners() {
         }
 
         // Jeśli ten tydzień jest pusty, a mamy zajęcia w październiku 2026, ustawmy tydzień z zajęciami (12-16.10)
-        if (!hasEventsInWeek && currentDate.getFullYear() === 2026 && currentDate.getMonth() === 9) {
+        if (!hasEventsInWeek && currentDate.getFullYear() === 2026 && currentDate.getMonth() === 10) {
+          currentDate = new Date(2026, 10, 9);
+        } else if (!hasEventsInWeek && currentDate.getFullYear() === 2026 && currentDate.getMonth() === 9) {
           currentDate = new Date(2026, 9, 14);
         }
       }
@@ -570,12 +978,12 @@ function initEventListeners() {
   });
   document.getElementById('importFileInput').addEventListener('change', importFromJson);
   document.getElementById('resetDataBtn').addEventListener('click', () => {
-    if (confirm('Czy na pewno chcesz przywrócić oryginalny plan Zuzi z października 2026? Twoje własne zmiany w tym planie zostaną zresetowane.')) {
+    if (confirm('Czy na pewno chcesz przywrócić oryginalny plan Zuzi (Październik i Listopad 2026)? Twoje własne zmiany w tym planie zostaną zresetowane.')) {
       events = [...DEFAULT_EVENTS];
       saveEvents();
-      currentDate = new Date(2026, 9, 1);
+      currentDate = new Date(2026, 10, 1);
       renderApp();
-      showToast('Przywrócono oryginalny plan');
+      showToast('Przywrócono oryginalny plan (Październik i Listopad 2026)');
     }
   });
 
