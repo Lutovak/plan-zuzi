@@ -477,7 +477,7 @@ body {
 
 .calendar-grid-header {
   display: grid;
-  grid-template-columns: repeat(7, minmax(0, 1fr));
+  grid-template-columns: repeat(7, 1fr);
   background: var(--bg-card);
   border-top-left-radius: var(--radius-lg);
   border-top-right-radius: var(--radius-lg);
@@ -490,12 +490,6 @@ body {
   color: var(--text-muted);
   text-align: center;
   padding: 0.75rem 0;
-  width: 100%;
-  box-sizing: border-box;
-}
-
-.day-short {
-  display: none;
 }
 
 .calendar-grid-header .weekend-col {
@@ -504,7 +498,7 @@ body {
 
 .calendar-grid-days {
   display: grid;
-  grid-template-columns: repeat(7, minmax(0, 1fr));
+  grid-template-columns: repeat(7, 1fr);
   background: var(--border-color);
   gap: 1px;
   border: 1px solid var(--border-color);
@@ -512,8 +506,6 @@ body {
   border-bottom-right-radius: var(--radius-lg);
   overflow: hidden;
   box-shadow: var(--shadow-sm);
-  width: 100%;
-  box-sizing: border-box;
 }
 
 .day-cell {
@@ -647,170 +639,14 @@ body {
   word-break: break-word;
 }
 
-.day-cell.is-selected {
-  outline: 2.5px solid var(--primary);
-  background-color: var(--primary-soft) !important;
-  z-index: 2;
-}
-
-.day-cell.is-today.is-selected {
-  background-color: var(--primary-soft) !important;
-}
-
-/* Selected Day Panel (Szczegóły wybranego dnia pod kalendarzem) */
-.selected-day-panel {
-  margin-top: 1.25rem;
-  background: var(--bg-card);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-lg);
-  padding: 1.25rem;
-  box-shadow: var(--shadow-sm);
-  transition: all var(--transition-fast);
-}
-
-.selected-day-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 1rem;
-  padding-bottom: 0.75rem;
-  border-bottom: 1px solid var(--border-color);
-  flex-wrap: wrap;
-  gap: 0.75rem;
-}
-
-.selected-day-info {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.selected-day-icon {
-  font-size: 1.6rem;
-}
-
-.selected-day-heading {
-  font-size: 1.15rem;
-  font-weight: 800;
-  color: var(--text-main);
-  line-height: 1.2;
-}
-
-.selected-day-count {
-  font-size: 0.8rem;
-  font-weight: 600;
+.event-location {
+  font-size: 0.72rem;
   color: var(--text-muted);
-}
-
-.selected-day-events-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.selected-day-card {
+  margin-top: 0.15rem;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 0.85rem 1.1rem;
-  background: var(--bg-page);
-  border: 1px solid var(--border-color);
-  border-left-width: 4.5px;
-  border-radius: var(--radius-md);
-  transition: all var(--transition-fast);
-  gap: 1rem;
-}
-
-.selected-day-card:hover {
-  transform: translateX(2px);
-  border-color: #cbd5e1;
-  background: #ffffff;
-  box-shadow: var(--shadow-sm);
-}
-
-.selected-card-main {
-  display: flex;
-  flex-direction: column;
   gap: 0.25rem;
-  flex: 1;
-}
-
-.selected-card-top {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.selected-card-time {
-  font-size: 0.82rem;
-  font-weight: 700;
-  color: var(--text-main);
-}
-
-.selected-card-title {
-  font-size: 1.05rem;
-  font-weight: 800;
-  color: var(--text-main);
-  letter-spacing: -0.01em;
-}
-
-.selected-card-loc {
-  font-size: 0.84rem;
-  color: var(--text-muted);
-  font-weight: 500;
-}
-
-.selected-card-notes {
-  font-size: 0.8rem;
-  color: #64748b;
-  font-style: italic;
-}
-
-.selected-card-actions {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.btn-card-action {
-  padding: 0.4rem 0.75rem;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border-color);
-  background: #ffffff;
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: var(--text-main);
-  cursor: pointer;
-  transition: all var(--transition-fast);
-}
-
-.btn-card-action:hover {
-  background: #f1f5f9;
-  border-color: #cbd5e1;
-}
-
-.btn-card-action.text-danger:hover {
-  background: #ffe4e6;
-  border-color: #f43f5e;
-  color: #e11d48;
-}
-
-.selected-day-empty {
-  text-align: center;
-  padding: 1.75rem 1rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.5rem;
-  color: var(--text-muted);
-}
-
-.selected-day-empty .empty-icon {
-  font-size: 2rem;
-}
-
-.selected-day-empty p {
-  font-size: 0.92rem;
+  line-height: 1.2;
 }
 
 /* ==========================================================================
@@ -1357,192 +1193,46 @@ body {
    ========================================================================== */
 @media (max-width: 1024px) {
   .day-cell {
-    min-height: 110px;
+    min-height: 120px;
   }
 }
 
 @media (max-width: 768px) {
   body {
-    padding: 0.5rem;
-    overflow-x: hidden;
+    padding: 0.6rem;
   }
 
-  .app-container {
-    gap: 0.75rem;
-    max-width: 100vw;
-  }
-
-  /* Header na telefonie */
   .app-header {
-    padding: 0.75rem 1rem;
-    gap: 0.6rem;
+    padding: 1rem;
   }
 
-  .logo-badge {
-    width: 36px;
-    height: 36px;
-    font-size: 1.25rem;
-  }
-
-  .title-group h1 {
-    font-size: 1.2rem;
-  }
-
-  .subtitle {
-    display: none;
-  }
-
-  #manageLocationsBtn,
-  #addBlockBtn {
-    display: none; /* Dostępne w menu więcej opcji */
-  }
-
-  /* Pasek nawigacji i sterowania */
   .controls-bar {
-    padding: 0.75rem;
-    gap: 0.65rem;
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .nav-controls {
-    justify-content: space-between;
-    width: 100%;
-  }
-
-  .current-period-label {
-    font-size: 1.1rem;
-  }
-
-  .view-and-filters {
-    width: 100%;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-
-  .search-box {
-    width: 100%;
+    padding: 0.85rem;
   }
 
   .search-box input {
-    width: 100% !important;
-  }
-
-  .view-toggle {
     width: 100%;
-    display: flex;
   }
 
-  .view-btn {
-    flex: 1;
-    text-align: center;
-    padding: 0.35rem 0.5rem;
-    font-size: 0.82rem;
+  .calendar-grid-header div {
+    font-size: 0.7rem;
   }
 
-  /* Filtry przedmiotów: 1 zgrabny przewijany wiersz */
-  .subject-chips-bar {
-    padding: 0.2rem 0;
-  }
-
-  .chips-label {
-    display: none;
-  }
-
-  .chips-container {
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    padding-bottom: 4px;
-    gap: 0.4rem;
-  }
-
-  .filter-chip {
-    padding: 0.25rem 0.7rem;
-    font-size: 0.76rem;
-    white-space: nowrap;
-    flex-shrink: 0;
-  }
-
-  /* Skrócone nazwy dni: Pn, Wt, Śr, Cz, Pt, Sb, Nd */
-  .day-full {
-    display: none;
-  }
-
-  .day-short {
-    display: inline;
-    font-weight: 700;
-    font-size: 0.75rem;
-  }
-
-  .calendar-grid-header {
-    padding: 0.5rem 0;
-    font-size: 0.75rem;
-  }
-
-  /* Komórki siatki na telefonie: zgrabne, czytelne kafelki */
   .day-cell {
-    min-height: 60px;
-    padding: 0.25rem 0.15rem;
-    cursor: pointer;
-  }
-
-  .day-header {
-    justify-content: center;
-    margin-bottom: 2px;
-  }
-
-  .day-header .add-event-quick-btn {
-    display: none !important;
-  }
-
-  .day-number {
-    font-size: 0.75rem;
-    font-weight: 700;
-  }
-
-  .day-events-list {
-    gap: 2px;
+    min-height: 95px;
+    padding: 0.35rem;
   }
 
   .event-tile {
-    padding: 2px 3px;
-    border-radius: 4px;
-    border-left-width: 2.5px;
-    margin-bottom: 1px;
-    box-shadow: none;
-  }
-
-  .event-time {
-    display: none;
+    padding: 0.25rem 0.35rem;
   }
 
   .event-title {
-    font-size: 0.65rem;
-    font-weight: 700;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    line-height: 1.15;
+    font-size: 0.75rem;
   }
 
   .event-location {
-    display: none;
-  }
-
-  .day-events-list .event-tile:nth-child(n+3) {
-    display: none;
-  }
-
-  .day-events-list.has-overflow::after {
-    content: '+więcej';
-    font-size: 0.55rem;
-    color: var(--text-muted);
-    font-weight: 700;
-    text-align: center;
-    display: block;
-    line-height: 1;
-    margin-top: 1px;
+    display: none; /* schowaj salę na małych ekranach w widoku miesiąca dla czytelności */
   }
 
   .week-days-container {
@@ -1551,23 +1241,6 @@ body {
 
   .week-day-column {
     min-height: auto;
-  }
-
-  /* Panel dnia pod siatką */
-  .selected-day-panel {
-    padding: 1rem;
-    margin-top: 0.85rem;
-  }
-
-  .selected-day-card {
-    padding: 0.75rem 0.85rem;
-    flex-direction: column;
-    align-items: stretch;
-    gap: 0.65rem;
-  }
-
-  .selected-card-actions {
-    justify-content: flex-end;
   }
 }
 

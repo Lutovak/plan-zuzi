@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;1,600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=3">
+  <link rel="stylesheet" href="style.css?v=2">
 </head>
 <body>
   <div class="app-container">
@@ -88,33 +88,16 @@
       <!-- Month View (Default) -->
       <div id="monthView" class="view-container active">
         <div class="calendar-grid-header">
-          <div><span class="day-full">Poniedziałek</span><span class="day-short">Pn</span></div>
-          <div><span class="day-full">Wtorek</span><span class="day-short">Wt</span></div>
-          <div><span class="day-full">Środa</span><span class="day-short">Śr</span></div>
-          <div><span class="day-full">Czwartek</span><span class="day-short">Cz</span></div>
-          <div><span class="day-full">Piątek</span><span class="day-short">Pt</span></div>
-          <div class="weekend-col"><span class="day-full">Sobota</span><span class="day-short">Sb</span></div>
-          <div class="weekend-col"><span class="day-full">Niedziela</span><span class="day-short">Nd</span></div>
+          <div>Poniedziałek</div>
+          <div>Wtorek</div>
+          <div>Środa</div>
+          <div>Czwartek</div>
+          <div>Piątek</div>
+          <div class="weekend-col">Sobota</div>
+          <div class="weekend-col">Niedziela</div>
         </div>
         <div class="calendar-grid-days" id="calendarDaysGrid">
           <!-- Calendar cells rendered dynamically -->
-        </div>
-
-        <!-- Panel szczegółów wybranego dnia (widoczny na telefonach i tabletach) -->
-        <div id="selectedDayPanel" class="selected-day-panel">
-          <div class="selected-day-header">
-            <div class="selected-day-info">
-              <span class="selected-day-icon">📅</span>
-              <div>
-                <h3 id="selectedDayTitle" class="selected-day-heading">Poniedziałek, 2 listopada 2026</h3>
-                <span id="selectedDayCount" class="selected-day-count">2 zajęcia</span>
-              </div>
-            </div>
-            <button id="addEventSelectedDayBtn" class="btn btn-sm btn-primary">＋ Dodaj zajęcia</button>
-          </div>
-          <div id="selectedDayEventsList" class="selected-day-events-list">
-            <!-- Dynamicznie renderowane szczegółowe kafelki -->
-          </div>
         </div>
       </div>
 
@@ -423,7 +406,7 @@
   <!-- Toast Notification -->
   <div id="toast" class="toast">Powiadomienie</div>
 
-  <script src="app.js?v=3"></script>
+  <script src="app.js?v=2"></script>
 
   <!-- MODAL: Synchronizacja Między Urządzeniami -->
   <div class="modal-backdrop" id="syncModal" style="display: none;">
