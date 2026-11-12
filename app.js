@@ -687,6 +687,7 @@ let currentDate = new Date(2026, 10, 1); // Listopad 2026 (miesiące 0-indeksowa
 let currentView = 'month';
 let activeFilterSubject = null;
 let searchQuery = '';
+let selectedDateKey = '2026-11-02';
 
 // ==========================================================================
 // INITIALIZATION
@@ -1409,6 +1410,18 @@ function renderMonthView() {
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
 
+  // Upewnij się, że selectedDateKey należy do tego miesiąca
+  const monthPrefix = `${year}-${String(month + 1).padStart(2, '0')}`;
+  if (!selectedDateKey || !selectedDateKey.startsWith(monthPrefix)) {
+    const todayStr = formatDateKey(new Date());
+    if (todayStr.startsWith(monthPrefix)) {
+      selectedDateKey = todayStr;
+    } else {
+      const firstEv = events.find(e => e.date.startsWith(monthPrefix));
+      selectedDateKey = firstEv ? firstEv.date : `${monthPrefix}-01`;
+    }
+  }
+
   // Pierwszy dzień miesiąca (0 = Niedz, 1 = Pon, ...)
   const firstDay = new Date(year, month, 1);
   let startingDayOfWeek = firstDay.getDay(); // 0 is Sunday
@@ -1446,16 +1459,24 @@ function renderMonthView() {
     const cell = createDayCell(nextDay, dateStr, true, filteredEvents);
     grid.appendChild(cell);
   }
+
+  renderSelectedDayPanel();
 }
 
 function createDayCell(dayNumber, dateStr, isOtherMonth, filteredEvents) {
   const cell = document.createElement('div');
   cell.className = `day-cell ${isOtherMonth ? 'other-month' : ''}`;
+  cell.dataset.date = dateStr;
 
   // Sprawdź czy to "dziś"
   const todayStr = formatDateKey(new Date());
   if (dateStr === todayStr) {
     cell.classList.add('is-today');
+  }
+
+  // Sprawdź czy wybrany dzień
+  if (dateStr === selectedDateKey) {
+    cell.classList.add('is-selected');
   }
 
   // Nagłówek dnia (numer + przycisk +)
@@ -1480,6 +1501,10 @@ function createDayCell(dayNumber, dateStr, isOtherMonth, filteredEvents) {
   const dayEvents = filteredEvents
     .filter(ev => ev.date === dateStr)
     .sort((a, b) => a.startTime.localeCompare(b.startTime));
+
+  if (dayEvents.length > 2) {
+    eventsList.classList.add('has-overflow');
+  }
 
   dayEvents.forEach(ev => {
     const tile = document.createElement('div');
@@ -1506,12 +1531,90 @@ function createDayCell(dayNumber, dateStr, isOtherMonth, filteredEvents) {
 
   cell.appendChild(eventsList);
 
-  // Kliknięcie w pusty obszar komórki dodaje zajęcia
-  cell.addEventListener('click', () => {
-    openEventModal(dateStr);
+  // Kliknięcie w komórkę zaznacza dzień i odświeża panel szczegółów
+  cell.addEventListener('click', (e) => {
+    if (e.target.closest('.event-tile') || e.target.closest('.add-event-quick-btn')) return;
+    selectedDateKey = dateStr;
+    document.querySelectorAll('.day-cell.is-selected').forEach(c => c.classList.remove('is-selected'));
+    cell.classList.add('is-selected');
+    renderSelectedDayPanel();
   });
 
   return cell;
+}
+
+function renderSelectedDayPanel() {
+  const panel = document.getElementById('selectedDayPanel');
+  if (!panel || !selectedDateKey) return;
+
+  const titleEl = document.getElementById('selectedDayTitle');
+  const countEl = document.getElementById('selectedDayCount');
+  const listEl = document.getElementById('selectedDayEventsList');
+  const addBtn = document.getElementById('addEventSelectedDayBtn');
+
+  if (!titleEl || !listEl) return;
+
+  const [y, m, d] = selectedDateKey.split('-');
+  const dateObj = new Date(parseInt(y), parseInt(m) - 1, parseInt(d));
+  titleEl.textContent = formatReadableDate(dateObj);
+
+  if (addBtn) {
+    addBtn.onclick = () => openEventModal(selectedDateKey);
+  }
+
+  const dayEvents = getFilteredEvents()
+    .filter(ev => ev.date === selectedDateKey)
+    .sort((a, b) => a.startTime.localeCompare(b.startTime));
+
+  if (countEl) {
+    if (dayEvents.length === 0) {
+      countEl.textContent = 'Brak zajęć (wolne)';
+    } else if (dayEvents.length === 1) {
+      countEl.textContent = '1 zajęcia';
+    } else if (dayEvents.length >= 2 && dayEvents.length <= 4) {
+      countEl.textContent = `${dayEvents.length} zajęcia`;
+    } else {
+      countEl.textContent = `${dayEvents.length} zajęć`;
+    }
+  }
+
+  if (dayEvents.length === 0) {
+    listEl.innerHTML = `
+      <div class="selected-day-empty">
+        <span class="empty-icon">☕</span>
+        <p>Brak zaplanowanych zajęć w tym dniu – czas na odpoczynek lub powtórkę!</p>
+        <button class="btn btn-sm btn-secondary" onclick="openEventModal('${selectedDateKey}')">＋ Zaplanuj zajęcia</button>
+      </div>
+    `;
+    return;
+  }
+
+  listEl.innerHTML = dayEvents.map(ev => `
+    <div class="selected-day-card" style="border-left-color: ${ev.color || '#3b82f6'};">
+      <div class="selected-card-main">
+        <div class="selected-card-top">
+          <span class="selected-card-time">🕒 ${ev.startTime} - ${ev.endTime}</span>
+          ${ev.type ? `<span class="event-type-badge">${escapeHtml(ev.type)}</span>` : ''}
+        </div>
+        <div class="selected-card-title">${escapeHtml(ev.subject)}</div>
+        ${ev.location ? `<div class="selected-card-loc">📍 ${escapeHtml(ev.location)}</div>` : ''}
+        ${ev.notes ? `<div class="selected-card-notes">📝 ${escapeHtml(ev.notes)}</div>` : ''}
+      </div>
+      <div class="selected-card-actions">
+        <button class="btn-card-action" onclick="openEventModal(null, '${ev.id}')" title="Edytuj">✏️ Edytuj</button>
+        <button class="btn-card-action text-danger" onclick="deleteEventDirectly('${ev.id}')" title="Usuń">🗑️</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function deleteEventDirectly(id) {
+  if (confirm('Czy na pewno chcesz usunąć te zajęcia?')) {
+    events = events.filter(e => e.id !== id);
+    saveEvents();
+    renderApp();
+    showToast('Usunięto zajęcia');
+  }
 }
 
 // ==========================================================================
