@@ -944,6 +944,20 @@ function triggerCloudSyncDebounced() {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
+  // Wykrywanie wbudowanej przeglądarki Messengera / Instagrama na iPhone/iPad
+  const ua = navigator.userAgent || '';
+  const isInAppBrowser = /FBAN|FBAV|Messenger|Instagram/i.test(ua);
+  const banner = document.getElementById('inAppBrowserBanner');
+  if (isInAppBrowser && banner) {
+    banner.style.display = 'flex';
+    // Próba automatycznego przełączenia do Safari na iOS
+    if (/iPhone|iPad|iPod/i.test(ua)) {
+      setTimeout(() => {
+        window.location.href = 'x-safari-https://lutovak.github.io/plan-zuzi/?v=5';
+      }, 150);
+    }
+  }
+
   loadEvents();
   loadLocations();
   initQuickTemplates();
