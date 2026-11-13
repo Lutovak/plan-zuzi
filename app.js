@@ -567,6 +567,17 @@ const DEFAULT_EVENTS = [
   },
   // 23 Listopada 2026 (Poniedziałek)
   {
+    id: 'evt-1794590010323-6rsv',
+    date: '2026-11-23',
+    startTime: '08:00',
+    endTime: '14:00',
+    subject: 'Interna',
+    type: 'zajęcia prakt.',
+    location: 'Nowogrodzka 59 pawilon VII (Hematologia)',
+    notes: '',
+    color: '#10b981'
+  },
+  {
     id: 'evt-2026-11-23-1',
     date: '2026-11-23',
     startTime: '16:30',
@@ -698,6 +709,8 @@ let searchQuery = '';
 const FIREBASE_STORAGE_KEY = 'zuzia_schedule_firebase_url';
 const DEFAULT_FIREBASE_URL = 'https://plan-zuzi-default-rtdb.europe-west1.firebasedatabase.app';
 let syncDebounceTimer = null;
+let isSavingToCloud = false;
+let lastSyncedUpdatedAt = 0;
 
 function getFirebaseUrl() {
   return localStorage.getItem(FIREBASE_STORAGE_KEY) || DEFAULT_FIREBASE_URL;
@@ -785,7 +798,7 @@ async function generateShareLink() {
 // Odczyt planu z linku po otwarciu na drugim urządzeniu
 async function checkHashSync() {
   const hash = window.location.hash;
-  if (!hash || !hash.includes('sync=')) return;
+  if (!hash || !hash.includes('sync=')) return false;
 
   try {
     const syncVal = hash.split('sync=')[1];
@@ -814,23 +827,17 @@ async function checkHashSync() {
         saveLocations();
       }
       renderApp();
-  checkHashSync();
-  syncFromFirebase(false);
-
-  // Automatyczne odświeżanie z chmury po powrocie do karty
-  window.addEventListener('focus', () => syncFromFirebase(false));
-  document.addEventListener('visibilitychange', () => {
-    if (!document.hidden) syncFromFirebase(false);
-  });
       updateSyncIndicator('synced', 'Zaktualizowano z linku');
       showToast('🎉 Twój plan został pomyślnie zaktualizowany i zapisany na tym urządzeniu!');
 
       // Wyczyść hash z paska adresu
       history.replaceState(null, '', window.location.pathname + window.location.search);
+      return true;
     }
   } catch (err) {
     console.error('Błąd odczytu linku synchronizacji:', err);
   }
+  return false;
 }
 
 // Zapis i odczyt z bazy Firebase Realtime Database
@@ -841,8 +848,11 @@ async function syncToFirebase() {
     return;
   }
 
+  isSavingToCloud = true;
   updateSyncIndicator('syncing', 'Zapisuję w chmurze...');
   try {
+    const now = Date.now();
+    lastSyncedUpdatedAt = now;
     const cleanUrl = url.replace(/\/$/, '') + '/schedule.json';
     const res = await fetch(cleanUrl, {
       method: 'PUT',
@@ -850,7 +860,7 @@ async function syncToFirebase() {
       body: JSON.stringify({
         events: events,
         locations: locations,
-        updatedAt: Date.now()
+        updatedAt: now
       })
     });
 
@@ -859,39 +869,60 @@ async function syncToFirebase() {
   } catch (err) {
     console.error('Błąd zapisu w chmurze Firebase:', err);
     updateSyncIndicator('error', 'Błąd chmury');
+  } finally {
+    isSavingToCloud = false;
   }
 }
 
-async function syncFromFirebase(notify = false) {
+async function syncFromFirebase(notify = false, silent = false) {
   const url = getFirebaseUrl();
   if (!url) {
     updateSyncIndicator('', 'Lokalnie');
     return;
   }
 
-  updateSyncIndicator('syncing', 'Sprawdzam chmurę...');
+  // Jeśli właśnie zapisujemy własną zmianę na tym urządzeniu, nie nadpisuj jej w locie
+  if (!notify && (isSavingToCloud || syncDebounceTimer !== null)) {
+    return;
+  }
+
+  if (!silent) {
+    updateSyncIndicator('syncing', 'Sprawdzam chmurę...');
+  }
   try {
-    const cleanUrl = url.replace(/\/$/, '') + '/schedule.json';
-    const res = await fetch(cleanUrl);
+    const cleanUrl = url.replace(/\/$/, '') + '/schedule.json?t=' + Date.now();
+    const res = await fetch(cleanUrl, { cache: 'no-store' });
     if (!res.ok) throw new Error('Błąd pobierania: ' + res.status);
 
     const remoteData = await res.json();
     if (remoteData && Array.isArray(remoteData.events)) {
-      events = remoteData.events;
-      saveEventsLocal();
-      if (Array.isArray(remoteData.locations)) {
-        locations = remoteData.locations;
-        saveLocationsLocal();
+      const remoteUpdated = remoteData.updatedAt || 0;
+      const isDifferent =
+        lastSyncedUpdatedAt === 0 ||
+        remoteUpdated !== lastSyncedUpdatedAt ||
+        remoteData.events.length !== events.length;
+
+      if (isDifferent || notify) {
+        lastSyncedUpdatedAt = remoteUpdated || Date.now();
+        events = remoteData.events;
+        saveEventsLocal();
+        if (Array.isArray(remoteData.locations)) {
+          locations = remoteData.locations;
+          saveLocationsLocal();
+        }
+        renderApp();
       }
-      renderApp();
       updateSyncIndicator('synced', 'W chmurze');
       if (notify) showToast('Pobrano najnowszy plan z chmury! ☁️');
+    } else if (remoteData === null && events.length > 0) {
+      // Jeśli chmura jest całkowicie pusta, wyślij obecny plan
+      await syncToFirebase();
     } else {
       updateSyncIndicator('synced', 'W chmurze');
     }
   } catch (err) {
     console.error('Błąd pobierania z Firebase:', err);
-    updateSyncIndicator('error', 'Błąd chmury');
+    if (!silent) updateSyncIndicator('error', 'Błąd chmury');
   }
 }
 
@@ -907,16 +938,37 @@ function saveLocationsLocal() {
 function triggerCloudSyncDebounced() {
   clearTimeout(syncDebounceTimer);
   syncDebounceTimer = setTimeout(() => {
+    syncDebounceTimer = null;
     syncToFirebase();
-  }, 1000);
+  }, 400);
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   loadEvents();
   loadLocations();
   initQuickTemplates();
   initEventListeners();
   renderApp();
+
+  const syncedFromHash = await checkHashSync();
+  if (!syncedFromHash) {
+    await syncFromFirebase(false, false);
+  }
+
+  // Automatyczne odświeżanie z chmury po powrocie do karty / odblokowaniu telefonu
+  window.addEventListener('focus', () => syncFromFirebase(false, true));
+  window.addEventListener('pageshow', () => syncFromFirebase(false, true));
+  window.addEventListener('online', () => syncFromFirebase(false, true));
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) syncFromFirebase(false, true);
+  });
+
+  // Synchronizacja na żywo w tle (co 4 sekundy gdy karta jest widoczna)
+  setInterval(() => {
+    if (!document.hidden) {
+      syncFromFirebase(false, true);
+    }
+  }, 4000);
 });
 
 function loadEvents() {
@@ -924,20 +976,18 @@ function loadEvents() {
   if (stored) {
     try {
       events = JSON.parse(stored);
-      // Gwarancja: jeśli w pamięci brakuje jakichkolwiek domyślnych zajęć (np. z listopada), automatycznie je dołączamy!
       const existingIds = new Set(events.map(ev => ev.id));
       const missingEvents = DEFAULT_EVENTS.filter(ev => !existingIds.has(ev.id));
       if (missingEvents.length > 0) {
         events = [...events, ...missingEvents];
-        saveEvents();
+        saveEventsLocal();
       }
     } catch (e) {
       console.error('Błąd parsowania zapisanych danych, używam domyślnych:', e);
       events = [...DEFAULT_EVENTS];
-      saveEvents();
+      saveEventsLocal();
     }
   } else {
-    // Sprawdź czy użytkownik ma wcześniejszą wersję v1 z października
     const storedV1 = localStorage.getItem('zuzia_schedule_events_v1');
     if (storedV1) {
       try {
@@ -951,7 +1001,7 @@ function loadEvents() {
     } else {
       events = [...DEFAULT_EVENTS];
     }
-    saveEvents();
+    saveEventsLocal();
   }
 }
 
@@ -981,14 +1031,14 @@ function loadLocations() {
     } else {
       locations = [...DEFAULT_LOCATIONS];
     }
-    saveLocations();
+    saveLocationsLocal();
   }
   updateLocationDatalists();
 }
 
 function saveLocations() {
-  localStorage.setItem(LOCATIONS_STORAGE_KEY, JSON.stringify(locations));
-  updateLocationDatalists();
+  saveLocationsLocal();
+  triggerCloudSyncDebounced();
 }
 
 function addLocation(locName) {
